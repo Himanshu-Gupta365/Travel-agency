@@ -1,19 +1,16 @@
 import {Link, NavLink, useLoaderData, useNavigate} from "react-router";
 import {sidebarItems} from "~/constants";
 import { cn } from "lib/utils";
+import { logoutUser } from "~/appwrite/auth";
 
 const NavItems = ({ handleClick }: { handleClick?: () => void}) => {
-    // const user = useLoaderData();
+    const user = useLoaderData();
     const navigate = useNavigate();
 
-    const user = {
-        name: 'John Doe',
-        email: 'LX6tE@example.com',
-        imageUrl: '/assets/images/david.webp'
-    }
+    
 
     const handleLogout = async () => {
-        // await logoutUser();
+        await logoutUser();
         navigate('/sign-in')
     }
   return (

@@ -9,8 +9,10 @@
     "typecheck": "react-router typegen && tsc"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@react-router/node": "7.10.1",
     "@react-router/serve": "7.10.1",
+    "@remix-run/node": "^2.17.2",
     "@syncfusion/ej2-base": "^32.1.19",
     "@syncfusion/ej2-react-buttons": "^32.1.19",
     "@syncfusion/ej2-react-charts": "^32.1.19",
