@@ -1,10 +1,57 @@
 import { Header, StatsCard, TripCard } from "components";
 import { dashboardStats, user, allTrips } from "~/constants";
+import type { Route } from './+types/dashboard';
+import {getAllUsers, getUser} from "~/appwrite/auth";
+import {getTripsByTravelStyle, getUserGrowthPerDay, getUsersAndTripsStats} from "~/appwrite/dashboard";
+import {getAllTrips} from "~/appwrite/trips";
+import {parseTripData} from "lib/utils";
 
 const { totalUsers, usersJoined, totalTrips, tripsCreated, userRole } =
   dashboardStats;
 
-const Dashboard = () => {
+  export const clientLoader = async () => {
+    const [
+        user,
+        dashboardStats,
+        trips,
+        userGrowth,
+        tripsByTravelStyle,
+        allUsers,
+    ] = await Promise.all([
+        await getUser(),
+        await getUsersAndTripsStats(),
+        await getAllTrips(4, 0),
+        await getUserGrowthPerDay(),
+        await getTripsByTravelStyle(),
+        await getAllUsers(4, 0),
+    ])
+
+    const allTrips = trips.allTrips.map(({ $id, tripDetails, imageUrls }) => ({
+        id: $id,
+        ...parseTripData(tripDetails),
+        imageUrls: imageUrls ?? []
+    }))
+
+    const mappedUsers: UsersItineraryCount[] = allUsers.users.map((user) => ({
+        imageUrl: user.imageUrl,
+        name: user.name,
+        count: user.itineraryCount ?? Math.floor(Math.random() * 10),
+    }))
+
+    return {
+        user,
+        dashboardStats,
+        allTrips,
+        userGrowth,
+        tripsByTravelStyle,
+        allUsers: mappedUsers
+    }
+}
+
+const Dashboard = ({ loaderData }: Route.ComponentProps) => {
+
+  
+
   return (
     <main className="dashboard wrapper">
       <Header
