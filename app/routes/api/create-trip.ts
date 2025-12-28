@@ -1,9 +1,9 @@
 import { type ActionFunctionArgs, data } from "react-router";
-
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { parseMarkdownToJson, parseTripData } from "lib/utils";
 import { appwriteConfig, database } from "~/appwrite/client";
 import { ID } from "appwrite";
+import {createProduct} from "lib/stripe";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   const {
@@ -72,7 +72,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       .generateContent([prompt]);
 
     const raw = textResult.response.text();
-    // console.log("Gemini raw output:", raw);
+    console.log("Gemini raw output:", raw);
 
     // Remove markdown fences if present
     const cleaned = raw.replace(/```json|```/g, "").trim();
@@ -99,6 +99,25 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       }
     );
 
+
+    const tripDetails = parseTripData(result.tripDetail) as Trip;
+    const tripPrice = parseInt(tripDetails.estimatedPrice.replace('$', ''), 10)
+    const paymentLink = await createProduct(
+            tripDetails.name,
+            tripDetails.description,
+            imageUrls,
+            tripPrice,
+            result.$id
+        )
+
+    await database.updateDocument(
+        appwriteConfig.databaseId,
+        appwriteConfig.tripCollectionId,
+        result.$id,
+        {
+            payment_link: paymentLink.url
+        }
+    )
    
 
     return data({ id: result.$id });
